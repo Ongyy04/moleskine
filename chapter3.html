@@ -1,0 +1,1086 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Dig Your Thoughts</title>
+  <link rel="icon" type="image/png" href="./images/favicon.png">
+<style>
+
+  @font-face {
+    font-family: 'Shinb7';
+    src: url('./SSShinb7Regular.ttf') format('truetype');
+  }
+
+  html, body { 
+    margin:0; width:100%; height:100%; overflow:hidden; background: #000; 
+    font-family: 'Shinb7', sans-serif;
+  }
+
+  .viewport { position:relative; width:100vw; height:100vh; overflow:hidden; cursor:grab; }
+   
+  .world {
+    position:absolute; top:0; left:0;
+    width:100vw; height:100vh;
+    transform-origin: top left;
+  }
+   
+  .bg {
+    position:absolute; inset:0;
+    background: url("./images/chapter3/bg.png") center / cover no-repeat;
+  }
+
+  #tunnel { position:absolute; inset:0; width:100%; height:100%; pointer-events:none; }
+
+
+  .house {
+    position: absolute;
+    width: 160px; 
+    height: auto;
+    pointer-events: auto; 
+    cursor: pointer;
+    z-index: 5;
+    transform: translate(-50%, -85%); 
+    transition: filter 0.3s;
+  }
+  .house:hover { filter: brightness(1.5); }
+
+  .houseLit {
+    opacity: 0;
+    transition: opacity 0.5s ease;
+    z-index: 6;
+    pointer-events: none;
+  }
+
+  .bubble-text::after {
+    content: '|';
+    animation: blink 1s infinite;
+    opacity: 1;
+  }
+  .bubble-text.done-typing::after {
+    display: none; 
+  }
+
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
+  }
+
+ 
+  .next-arrow-btn {
+    background: transparent;
+    border: none;
+    color: #3e2723;
+    font-size: 2rem;
+    cursor: pointer;
+    animation: bounceArrow 1s infinite;
+  }
+  @keyframes bounceArrow {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(5px); }
+  }
+
+  .spirit {
+    position: absolute;
+    width: 60px; height: auto;
+    z-index: 50; opacity: 0; pointer-events: none;
+    transform: translate(-50%, -85%);
+  }
+
+
+  #darkness {
+    position:absolute; inset:0;
+    width:100%; height:100%;
+    pointer-events:none;
+    z-index: 10; 
+    mix-blend-mode: multiply;
+    transition: opacity 2s ease;
+  }
+
+  #mole {
+    position:absolute;
+    width:90px;
+    height:auto;
+    left:0; top:0;
+    transform-origin: 50% 70%; 
+    pointer-events:none;
+    z-index: 20; 
+  }
+
+
+  #inventory {
+    position: fixed;
+    top: 20px; right: 20px;
+    z-index: 200;
+    display: flex; gap: 10px;
+    pointer-events: none;
+  }
+  .inv-slot {
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.1);
+    display: flex; justify-content: center; align-items: center;
+    font-weight: bold; color: #777;
+    backdrop-filter: blur(2px);
+    border: 1px solid rgba(255,255,255,0.1);
+    font-size: 14px;
+    transition: transform 0.3s;
+  }
+  .inv-slot.collected {
+    background: #FFD700; color: #000;
+    box-shadow: 0 0 15px #FFD700; transform: scale(1.2); border: 2px solid #fff;
+  }
+  .inv-slot.failed {
+    background: rgba(0,0,0,0.6); color: #ff6b6b; font-size: 1.5rem; border: 1px solid #ff6b6b;
+  }
+  .inv-slot.failed::after { content: "✕"; }
+  .inv-slot.failed span { display: none; }
+
+#skip-btn {
+  position: fixed;
+  bottom: 30px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1000;
+  background: rgba(0, 0, 0, 0.7);
+  border: 1px solid #fff;
+  color: #fff;
+  padding: 10px 25px;
+  border-radius: 30px;
+  font-family: 'Shinb7', sans-serif;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(4px);
+}
+#skip-btn:hover {
+  background: #fff;
+  color: #000;
+  transform: translateX(-50%) scale(1.1);
+}
+
+ 
+  #modal-overlay {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background-color: #000; 
+    z-index: 1000;
+    display: none;
+    justify-content: center; align-items: center;
+    overflow: hidden;
+  }
+
+  #modal-scale-container {
+    position: relative;
+    width: 1920px;
+    height: 951px;
+    background: transparent;
+    transform-origin: center center;
+  }
+
+  .modal-abs-item {
+    position: absolute;
+    display: block;
+  }
+
+  #modal-spirit-img {
+    z-index: 20;
+    filter: drop-shadow(0 0 25px rgba(255, 215, 0, 0.9));
+    animation: floatSpirit 3s ease-in-out infinite;
+  }
+
+  #modal-bubble-wrapper {
+    z-index: 30;
+    background: url('./images/chapter3/bgtalk.png') no-repeat center / 100% 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 0px 50px 40px 50px; 
+    box-sizing: border-box;
+  }
+
+  #modal-house-img {
+    z-index: 10;
+    filter: drop-shadow(0 0 80px rgba(255, 100, 100, 0.4));
+  }
+
+  #modal-hidden-m {
+    z-index: 100;
+    cursor: pointer;
+    transition: transform 0.2s;
+    pointer-events: auto;
+  }
+
+  /* 5번 M을 위한 툭 떨어지는 애니메이션 */
+  @keyframes dropReveal {
+    0% { opacity: 0; transform: translateY(-50px); }
+    60% { opacity: 1; transform: translateY(0); }
+    80% { transform: translateY(-10px); }
+    100% { opacity: 1; transform: translateY(0); }
+  }
+   
+  .m5-anim {
+    animation: dropReveal 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards !important;
+  }
+
+  .bubble-text {
+    color: #4e342e;
+    font-size: 1.4rem; 
+    line-height: 1.5;
+    font-weight: bold;
+    text-align: center;
+    margin-bottom: 20px;
+    white-space: pre-wrap;
+  }
+
+  .btn-group {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: 70%;
+  }
+
+  .paper-btn {
+    background: rgba(255, 255, 255, 0.6);
+    border: 2px dashed #8d6e63;
+    border-radius: 8px;
+    padding: 10px 0;
+    font-family: 'Shinb7', sans-serif;
+    font-size: 1.2rem;
+    color: #3e2723;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.2s;
+  }
+  .paper-btn:hover {
+    background: rgba(255, 255, 255, 0.95);
+    border-style: solid;
+    transform: scale(1.05);
+  }
+  .paper-btn.give-up {
+    background: transparent;
+    border: none;
+    color: #888;
+    font-size: 1rem;
+  }
+  .paper-btn.give-up:hover { color: #d32f2f; }
+
+  @keyframes floatSpirit {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-15px); }
+  }
+
+  #ending-container {
+    position: fixed;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 500;
+    display: none; 
+    opacity: 0;
+    transition: opacity 1s ease;
+    text-align: center;
+  }
+
+  #next-chapter-btn {
+    background: #D8CABC;
+    border: 3px solid #fff;
+    box-shadow: 0 0 20px #D8CABC;
+    font-family: 'Shinb7', sans-serif;
+    font-size: 2rem;
+    color: #3e2723;
+    padding: 15px 40px;
+    border-radius: 50px;
+    cursor: pointer;
+    animation: pulseBtn 2s infinite;
+  }
+  #next-chapter-btn:hover {
+    transform: scale(1.1);
+    background: #fff;
+    color: #000;
+  }
+
+  @keyframes pulseBtn {
+    0% { box-shadow: 0 0 0 0 rgba(255, 215, 0, 0.7); }
+    70% { box-shadow: 0 0 0 20px rgba(255, 215, 0, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(255, 215, 0, 0); }
+  }
+
+</style>
+</head>
+<body>
+  <div class="viewport" id="vp">
+    <div id="inventory">
+      <div class="inv-slot" id="slot-1"><span>M</span></div>
+      <div class="inv-slot" id="slot-2"><span>M</span></div>
+      <div class="inv-slot" id="slot-3"><span>M</span></div>
+      <div class="inv-slot" id="slot-4"><span>M</span></div>
+      <div class="inv-slot" id="slot-5"><span>M</span></div>
+    </div>
+
+    <button id="skip-btn" onclick="skipGame()">SKIP >></button>
+
+    <div class="world" id="world">
+      <div class="bg"></div>
+      <canvas id="tunnel"></canvas>
+      <canvas id="darkness"></canvas>
+      <img id="mole" src="./images/chapter3/do.gif" alt="두더지">
+    </div>
+
+    <div id="ending-container">
+        <button id="next-chapter-btn" onclick="goToNextChapter()">다음으로</button>
+    </div>
+  </div>
+
+  <div id="modal-overlay">
+    <div id="modal-scale-container">
+        <img id="modal-house-img" class="modal-abs-item" src="" alt="House">
+        <img id="modal-hidden-m" class="modal-abs-item" src="" alt="Hidden M">
+        <img id="modal-spirit-img" class="modal-abs-item" src="" alt="Spirit">
+        <div id="modal-bubble-wrapper" class="modal-abs-item">
+            <div class="bubble-text" id="modal-text">...</div>
+            <div class="btn-group" id="modal-btn-group"></div>
+        </div>
+    </div>
+  </div>
+
+  <script>
+
+ 
+  const commonLayout = {
+
+    spirit: { w: 600, h: 600, x: 20, y: 350 },
+
+    bubble: { w: 680.88, h: 371.29, x: 580, y: 80 }
+  };
+
+
+  const houseLayouts = {
+    1: {
+        house: { w: 913.86, h: 834.3, x: 950, y: 103.36 }, 
+        m: { w: 15, h: 15, x: 1568, y: 516.77, img: "m1.png" } 
+    },
+    2: {
+        house: { w: 1025.5, h: 676.23, x: 960, y: 175.05 }, 
+        m: { w: 10, h: 5.52, x: 1460, y: 429.12, img: "m2.png" }
+    },
+   3: {
+        house: { w: 831.55, h: 741.96, x: 1050, y: 109.32 }, 
+        m: { w: 10, h: 10, x: 1236, y: 423.12, img: "m3.png" }
+    },
+    4: {
+        house: { w: 875.32, h: 707.46, x: 1030, y: 143.82 }, 
+        m: { w: 10, h: 10, x: 1612, y: 627.39, img: "m4.png" }
+    },
+    5: {
+        house: { w: 994.31, h: 693.97, x: 910, y: 223.11 }, 
+        m: { w: 8, h: 7.72, x: 1453, y: 594.2, img: "m5.png" }
+    }
+  };
+
+ 
+  const houseData = {
+    1: {
+      img: "1_do.png", state: "active", stage: 0, 
+      dialogs: [
+        "구스타프 클림트야.\n나는 보이는 것보다 숨겨진 상징을 믿지.",
+        "여긴 왜 왔어?\n정답이 눈앞에 써 있을 거라 생각했니?",
+        "자연은 결코 순수하지 않아.\n의미는 항상 장식 속에 숨지.",
+        "잎을 보지 말고.\n갈라졌다가 다시 만나는 선을 봐.",
+        "그 나무 말이야.\n우연히 그렇게 자라진 않았어."
+      ]
+    },
+    2: {
+      img: "2_do.png", state: "active", stage: 0,
+      dialogs: [
+        "나는 빈센트 반 고흐.\n나는 사물을 그리지 않고, 느낌을 그려.",
+        "조용하지?\n아니, 사실은 엄청 시끄러워.",
+        "저 빛을 봐.\n가만히 있는 것 같아 보여?",
+        "위로 치솟았다가…\n다시 내려오지.",
+        "빛은 밤하늘의 별에만 있는게 아니야."
+      ]
+    },
+    3: {
+      img: "3_do.png", state: "active", stage: 0,
+      dialogs: [
+        "피카소다.\n나는 하나를 여러 번 본다.",
+        "쉬울거라고\n생각한 건 아니겠지?",
+        "전체를 보지 마.\n그게 제일 멍청한 관찰이야.",
+        "무늬를 잘 관찰해봐\n어색한 부분이 있지않아?",
+        "벽을 봐."
+      ]
+    },
+    4: {
+      img: "4_do.png", state: "active", stage: 0,
+      dialogs: [
+        "앙리 마티스.\n나는 복잡한 걸 질색해.",
+        "너무 열심히 보고 있네.\n그래서 못 찾는 거야.",
+        "색을 버려.\n질감도.",
+        "풀을 보지 말고.\n풀 사이를 봐.",
+        "윤곽만 남겨.\n그게 전부야."
+      ]
+    },
+    5: {
+      img: "1_do.png", state: "active", stage: 0,
+      dialogs: [
+        "바스키아.\n난 돌려 말 안 해.",
+        "아직도 못 찾았어?\n와, 대단하다.",
+        "자연 말고.\n구조 말고.",
+        "메시지는 어디로 가?\n전달되는 곳이지.",
+        "M.\n열어. 거기야."
+      ]
+    }
+  };
+
+  
+  let activeHouseId = null;
+  let isPaused = false; 
+  let isEnding = false; 
+
+  function applyRect(el, data) {
+    if(!el || !data) return;
+    el.style.width = data.w + "px";
+    el.style.height = data.h + "px";
+    el.style.left = data.x + "px";
+    el.style.top = data.y + "px";
+  }
+
+  function resizeModal() {
+    const container = document.getElementById('modal-scale-container');
+    const overlay = document.getElementById('modal-overlay');
+    if(overlay.style.display !== 'flex') return;
+
+    const w = window.innerWidth;
+    const h = window.innerHeight;
+    const baseW = 1920;
+    const baseH = 951;
+    const scale = Math.min(w / baseW, h / baseH);
+    container.style.transform = `scale(${scale})`;
+  }
+
+  window.addEventListener('resize', resizeModal);
+
+  function openModal(id) {
+    if (houseData[id].state !== "active") return;
+    
+    isPaused = true; 
+    activeHouseId = id;
+    const data = houseData[id];
+    const layout = houseLayouts[id];
+
+    const houseImg = document.getElementById('modal-house-img');
+    const spiritImg = document.getElementById('modal-spirit-img');
+    const bubbleWrapper = document.getElementById('modal-bubble-wrapper');
+    const hiddenM = document.getElementById('modal-hidden-m');
+
+    houseImg.src = `./images/chapter3/${id}__house.png`;
+    spiritImg.src = `./images/chapter3/${data.img}`;
+    hiddenM.src = `./images/chapter3/${layout.m.img}`;
+
+  
+    hiddenM.classList.remove('m5-anim');
+    hiddenM.style.pointerEvents = 'auto';
+
+    
+    if (id === 5) {
+        hiddenM.style.opacity = '0';
+    } else {
+        hiddenM.style.opacity = '1';
+    }
+
+    hiddenM.onclick = function() {
+        modalCollect(id);
+    };
+    hiddenM.style.display = 'block';
+
+    applyRect(spiritImg, commonLayout.spirit);
+    applyRect(bubbleWrapper, commonLayout.bubble);
+    applyRect(houseImg, layout.house);
+    applyRect(hiddenM, layout.m);
+
+    updateModalDialog(id);
+    const overlay = document.getElementById('modal-overlay');
+    overlay.style.display = 'flex';
+    
+    resizeModal();
+  }
+let typingTimer = null;
+const TYPE_SPEED_MS = 50; 
+
+
+function typeText(text) {
+  const bubbleText = document.getElementById('modal-text');
+  
+
+  if (typingTimer) clearInterval(typingTimer);
+  bubbleText.textContent = "";
+  bubbleText.classList.remove("done-typing"); // 커서 보이기
+
+  let i = 0;
+  
+  typingTimer = setInterval(() => {
+    
+    if (!text) {
+        clearInterval(typingTimer);
+        return;
+    }
+
+    bubbleText.textContent += text.charAt(i);
+    i++;
+    
+    if (i >= text.length) {
+      clearInterval(typingTimer);
+      typingTimer = null;
+      bubbleText.classList.add("done-typing"); // 커서 숨기기
+    }
+  }, TYPE_SPEED_MS);
+}
+function openModal(id) {
+  if (houseData[id].state !== "active") return;
+  
+  isPaused = true; 
+  activeHouseId = id;
+  const data = houseData[id];
+  const layout = houseLayouts[id];
+
+  const houseImg = document.getElementById('modal-house-img');
+  const spiritImg = document.getElementById('modal-spirit-img');
+  const bubbleWrapper = document.getElementById('modal-bubble-wrapper');
+  const hiddenM = document.getElementById('modal-hidden-m');
+
+  houseImg.src = `./images/chapter3/${id}__house.png`;
+  spiritImg.src = `./images/chapter3/${data.img}`;
+  hiddenM.src = `./images/chapter3/${layout.m.img}`;
+
+  hiddenM.classList.remove('m5-anim');
+  hiddenM.style.pointerEvents = 'auto';
+
+
+  if (id === 5) {
+      hiddenM.style.opacity = '0';
+  } else {
+      hiddenM.style.opacity = '1';
+  }
+
+  hiddenM.onclick = function() { modalCollect(id); };
+  hiddenM.style.display = 'block';
+
+  applyRect(spiritImg, commonLayout.spirit);
+  applyRect(bubbleWrapper, commonLayout.bubble);
+  applyRect(houseImg, layout.house);
+  applyRect(hiddenM, layout.m);
+
+
+  updateModalDialog(id);
+
+  const overlay = document.getElementById('modal-overlay');
+  overlay.style.display = 'flex';
+  
+  resizeModal();
+}
+
+ function updateModalDialog(id) {
+  const data = houseData[id];
+  const btnGroup = document.getElementById('modal-btn-group');
+  
+
+  typeText(data.dialogs[data.stage]);
+
+  let btnsHTML = "";
+
+
+  if (data.stage < 2) {
+      btnsHTML += `<button class="next-arrow-btn" onclick="modalNextStage(${id})">▼</button>`;
+  } 
+
+  else {
+
+      if (data.stage < data.dialogs.length - 1) {
+          btnsHTML += `<button class="paper-btn" onclick="modalNextStage(${id})">다음 힌트 볼래</button>`;
+      }
+
+      btnsHTML += `<button class="paper-btn give-up" onclick="modalGiveUp(${id})">못 찾겠어 (포기)</button>`;
+  }
+
+  btnGroup.innerHTML = btnsHTML;
+}
+function modalNextStage(id) {
+
+  if (houseData[id].stage < houseData[id].dialogs.length - 1) {
+    houseData[id].stage++;
+    updateModalDialog(id);
+  }
+}
+  function modalCollect(id) {
+  houseData[id].state = "collected";
+  document.getElementById(`slot-${id}`).classList.add('collected');
+  
+  const mEl = document.getElementById('modal-hidden-m');
+  if (id === 5) {
+      mEl.classList.add('m5-anim');
+      mEl.style.pointerEvents = 'none';
+  } else {
+      mEl.style.display = 'none';
+  }
+
+  const btnGroup = document.getElementById('modal-btn-group');
+  
+
+  typeText("역시, 보는 눈이 있네! (수집 성공)");
+  
+  btnGroup.innerHTML = `<button class="paper-btn" onclick="closeModal()">저장하고 떠나기</button>`;
+}
+
+function modalGiveUp(id) {
+  houseData[id].state = "failed";
+  document.getElementById(`slot-${id}`).classList.add('failed');
+  
+  const btnGroup = document.getElementById('modal-btn-group');
+  
+
+  typeText("아쉽지만, 기회는 끝났어.");
+  
+  btnGroup.innerHTML = `<button class="paper-btn give-up" onclick="closeModal()">닫고 떠나기</button>`;
+}
+
+  function skipGame() {
+    if (isEnding) return;
+    isEnding = true;
+    const btn = document.getElementById('skip-btn');
+    if(btn) btn.style.display = 'none';
+
+    for (let i = 1; i <= HOUSE_COUNT; i++) {
+      const slot = document.getElementById(`slot-${i}`);
+      if (!slot.classList.contains('collected')) {
+          slot.classList.add('failed'); 
+          houseData[i].state = "failed"; 
+      }
+    }
+
+    if (activeHouseId !== null) {
+        closeModal();
+    }
+
+    const darkness = document.getElementById('darkness');
+    if (darkness) {
+        darkness.style.opacity = 0; 
+    }
+
+    setTimeout(() => {
+        const endContainer = document.getElementById('ending-container');
+        if (endContainer) {
+            endContainer.style.display = 'block';
+            requestAnimationFrame(() => {
+                endContainer.style.opacity = 1;
+            });
+        }
+    }, 2000); 
+
+    if (!isPaused) animate();
+  }
+
+  function closeModal() {
+  if (typingTimer) clearInterval(typingTimer); 
+  
+  document.getElementById('modal-overlay').style.display = 'none';
+  activeHouseId = null;
+  isPaused = false; 
+  lastT = performance.now();
+  
+  checkAllCleared();
+
+  if(!isEnding) {
+      checkHouseProximity(mole.offsetLeft + 45, mole.offsetTop + 60);
+  }
+}
+
+  function checkAllCleared() {
+    const allDone = Object.values(houseData).every(h => h.state !== 'active');
+    
+    if (allDone && !isEnding) {
+        isEnding = true;
+        document.getElementById('darkness').style.opacity = 0;
+        
+        setTimeout(() => {
+            const endContainer = document.getElementById('ending-container');
+            endContainer.style.display = 'block';
+            setTimeout(() => { endContainer.style.opacity = 1; }, 50);
+        }, 3000);
+    }
+  }
+function saveScore() {
+    let count = 0;
+    
+    for (let i = 1; i <= HOUSE_COUNT; i++) {
+        if (houseData[i].state === "collected") {
+            count++;
+        }
+    }
+    
+    localStorage.setItem("mCount", count);
+    console.log("저장된 M 개수:", count); 
+}
+  function goToNextChapter() {
+    saveScore();
+    location.href = "outro.html";
+  }
+
+ 
+  const vp = document.getElementById("vp");
+  const world = document.getElementById("world");
+  const tunnel = document.getElementById("tunnel");
+  const ctx = tunnel.getContext("2d");
+  const darknessCanvas = document.getElementById("darkness");
+  const darkCtx = darknessCanvas.getContext("2d");
+  const mole = document.getElementById("mole");
+
+  const defaultTrunk = [
+    {x:0.05, y:0.55}, {x:0.3, y:0.45}, {x:0.5, y:0.55}, {x:0.7, y:0.45}, {x:0.95, y:0.5}
+  ];
+
+  let trunkPointsNorm = defaultTrunk;
+  const savedData = localStorage.getItem("drawnPath");
+
+  if (savedData) {
+    try {
+        const parsed = JSON.parse(savedData);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+            trunkPointsNorm = parsed;
+        }
+    } catch (e) { console.error(e); }
+  }
+
+  const HOUSE_COUNT = 5;
+  const houses = [];
+  let houseCoords = [];
+
+  function initHouses() {
+    for (let i = 1; i <= HOUSE_COUNT; i++) {
+      const base = document.createElement("img");
+      base.src = `./images/chapter3/${i}_house.png`;
+      base.className = "house";
+      
+      base.onclick = (e) => {
+        e.stopPropagation();
+        if(houses[i-1].lit.style.opacity === "1") {
+            openModal(i); 
+        }
+      };
+
+      const lit = document.createElement("img");
+      lit.src = `./images/chapter3/${i}_b_house.png`;
+      lit.className = "house houseLit";
+
+      const spirit = document.createElement("img");
+      spirit.src = `./images/chapter3/${houseData[i].img}`;
+      spirit.className = "spirit";
+      spirit.id = `spirit-${i}-ingame`;
+
+      world.appendChild(base);
+      world.appendChild(lit);
+      world.appendChild(spirit);
+
+      houses.push({ id: i, base, lit, spirit });
+    }
+  }
+  initHouses();
+
+  function clamp(v, a, b){ return Math.min(b, Math.max(a, v)); }
+
+  let scale = 2.5;
+  let x = 0, y = 0;
+  let camX = 0, camY = 0;
+  let cursorX = vp.clientWidth * 0.5;
+  let cursorY = vp.clientHeight * 0.5;
+
+  let renderSegments = []; 
+  let movePathPoints = [];
+
+  function generateMapData() {
+    const w = vp.clientWidth;
+    const h = vp.clientHeight;
+    const trunk = trunkPointsNorm.map(p => ({ x: p.x * w, y: p.y * h }));
+    const junctions = [];
+    houseCoords = [];
+
+    const safeMargin = h * 0.15;
+
+    for(let i=0; i<HOUSE_COUNT; i++) {
+        const t = 0.15 + (i / (HOUSE_COUNT - 1)) * 0.7;
+        const idx = t * (trunk.length - 1);
+        const i0 = Math.floor(idx);
+        const i1 = Math.min(i0 + 1, trunk.length - 1);
+        const ratio = idx - i0;
+        const jx = trunk[i0].x + (trunk[i1].x - trunk[i0].x) * ratio;
+        const jy = trunk[i0].y + (trunk[i1].y - trunk[i0].y) * ratio;
+        const isUp = (i % 2 === 0); 
+        const branchLen = h * 0.35;
+        
+        const hx = jx; 
+        let hy = isUp ? jy - branchLen : jy + branchLen;
+        hy = clamp(hy, safeMargin, h - safeMargin);
+
+        junctions.push({ junction: {x: jx, y: jy}, house: {x: hx, y: hy}, houseIndex: i });
+        houseCoords.push({ x: hx, y: hy, index: i });
+    }
+
+    renderSegments = [trunk];
+    junctions.forEach(j => renderSegments.push([j.junction, j.house]));
+
+    movePathPoints = [trunk[0]];
+    for(let i=0; i<junctions.length; i++) {
+        movePathPoints.push(junctions[i].junction);
+        movePathPoints.push(junctions[i].house);
+        movePathPoints.push({x: junctions[i].junction.x + 1, y: junctions[i].junction.y});
+    }
+    movePathPoints.push(trunk[trunk.length-1]);
+
+    junctions.forEach(j => {
+      const obj = houses[j.houseIndex];
+      if (obj) {
+        obj.base.style.left = j.house.x + "px";
+        obj.base.style.top = j.house.y + "px";
+        obj.lit.style.left = j.house.x + "px";
+        obj.lit.style.top = j.house.y + "px";
+        obj.spirit.style.left = j.house.x + "px";
+        obj.spirit.style.top = j.house.y + "px";
+      }
+    });
+  }
+
+  function bounds() {
+    const vw = vp.clientWidth;
+    const vh = vp.clientHeight;
+    return { minX: vw - vw * scale, minY: vh - vh * scale, maxX: 0, maxY: 0, vw, vh };
+  }
+
+  function applyTransform() {
+    world.style.transform = `translate(${x}px, ${y}px) scale(${scale})`;
+  }
+
+  function renderTunnel() {
+    const w = vp.clientWidth;
+    const h = vp.clientHeight;
+    ctx.clearRect(0, 0, w, h);
+    ctx.save();
+    ctx.lineJoin = "round";
+    ctx.lineCap = "round";
+    const colors = [{ c: "rgba(120, 72, 38, 0.10)", w: 140 }, { c: "rgba(120, 72, 38, 0.16)", w: 100 }, { c: "rgba(120, 72, 38, 0.22)", w: 70 }];
+    colors.forEach(l => {
+        ctx.strokeStyle = l.c;
+        ctx.lineWidth = l.w;
+        ctx.beginPath();
+        renderSegments.forEach(seg => {
+            if(seg.length < 2) return;
+            ctx.moveTo(seg[0].x, seg[0].y);
+            for(let i=1; i<seg.length; i++) ctx.lineTo(seg[i].x, seg[i].y);
+        });
+        ctx.stroke();
+    });
+    ctx.restore();
+  }
+
+  let path = [], segLen = [], totalLen = 0;
+  function buildPhysicsPath() {
+    path = [];
+    if (movePathPoints.length > 1) {
+        for (let i = 0; i < movePathPoints.length - 1; i++) {
+            const p0 = movePathPoints[i], p1 = movePathPoints[i+1];
+            const dist = Math.hypot(p1.x - p0.x, p1.y - p0.y);
+            const steps = Math.max(2, Math.floor(dist / 5)); 
+            for(let j=0; j<steps; j++){
+                const t = j/steps;
+                path.push({ x: p0.x + (p1.x - p0.x) * t, y: p0.y + (p1.y - p0.y) * t });
+            }
+        }
+        path.push(movePathPoints[movePathPoints.length-1]);
+    }
+    segLen = []; totalLen = 0;
+    for (let i=0;i<path.length-1;i++){
+      const d = Math.hypot(path[i+1].x-path[i].x, path[i+1].y-path[i].y);
+      segLen.push(d); totalLen += d;
+    }
+  }
+
+  function posOnPath(dist) {
+    if (path.length < 2) return { x:0, y:0, ang:0, s:0 };
+    let d = clamp(dist, 0, totalLen), acc = 0;
+    for (let i=0;i<segLen.length;i++){
+      const L = segLen[i];
+      if (d <= L || i === segLen.length-1) {
+        const a = path[i], b = path[i+1];
+        const t = L === 0 ? 0 : d / L;
+        const ang = Math.atan2(b.y-a.y, b.x-a.x) * 180 / Math.PI;
+        return { x: a.x + (b.x-a.x)*t, y: a.y + (b.y-a.y)*t, ang, s: acc + d };
+      }
+      d -= L; acc += L;
+    }
+    const last = path[path.length-1];
+    return { x:last.x, y:last.y, ang:0, s: totalLen };
+  }
+
+  function closestSOnPath(px, py) {
+    if (path.length < 2) return 0;
+    let bestS = 0, bestD2 = Infinity, acc = 0;
+    for (let i=0;i<path.length-1;i++){
+      const a = path[i], b = path[i+1];
+      const vx = b.x - a.x, vy = b.y - a.y, L2 = vx*vx + vy*vy;
+      let t = 0;
+      if (L2 > 0) t = clamp(((px - a.x)*vx + (py - a.y)*vy) / L2, 0, 1);
+      const dx = px - (a.x + vx*t), dy = py - (a.y + vy*t);
+      const d2 = dx*dx + dy*dy;
+      if (d2 < bestD2) { bestD2 = d2; bestS = acc + Math.sqrt(L2)*t; }
+      acc += Math.sqrt(L2);
+    }
+    return clamp(bestS, 0, totalLen);
+  }
+
+  function screenToWorld(sx, sy) { return { x: (sx - x) / scale, y: (sy - y) / scale }; }
+
+  vp.addEventListener("mousemove", (e) => {
+    if(isPaused) return; 
+    const r = vp.getBoundingClientRect();
+    cursorX = e.clientX - r.left;
+    cursorY = e.clientY - r.top;
+  });
+
+  let travel = 0, vel = 0, lastT = performance.now();
+  const MAX_SPEED = 300, STOP_RADIUS = 5, ACC = 6000;
+
+  function renderLight(lx, ly, radius) {
+    const w = vp.clientWidth, h = vp.clientHeight;
+    darkCtx.clearRect(0, 0, w, h);
+    
+    if(isEnding) return;
+
+    darkCtx.globalCompositeOperation = 'source-over';
+    darkCtx.fillStyle = 'rgba(0, 0, 0, 0.96)';
+    darkCtx.fillRect(0, 0, w, h);
+
+    darkCtx.globalCompositeOperation = 'destination-out';
+    const holeGrad = darkCtx.createRadialGradient(lx, ly, radius * 0.1, lx, ly, radius);
+    holeGrad.addColorStop(0, 'rgba(0,0,0,1)'); 
+    holeGrad.addColorStop(1, 'rgba(0,0,0,0)');
+    darkCtx.fillStyle = holeGrad;
+    darkCtx.beginPath(); darkCtx.arc(lx, ly, radius, 0, Math.PI * 2); darkCtx.fill();
+
+    darkCtx.globalCompositeOperation = 'source-over';
+    const tintGrad = darkCtx.createRadialGradient(lx, ly, radius * 0.1, lx, ly, radius);
+    tintGrad.addColorStop(0, 'rgba(255, 220, 150, 0.3)'); 
+    tintGrad.addColorStop(1, 'rgba(255, 180, 50, 0)');
+    darkCtx.fillStyle = tintGrad;
+    darkCtx.beginPath(); darkCtx.arc(lx, ly, radius, 0, Math.PI * 2); darkCtx.fill();
+  }
+
+  function checkHouseProximity(moleX, moleY) {
+    houseCoords.forEach(h => {
+      const dist = Math.hypot(moleX - h.x, moleY - h.y);
+      if(houseData[h.index+1].state === "active" && dist < 80) {
+          houses[h.index].lit.style.opacity = "1";
+      } else if (houseData[h.index+1].state === "collected") {
+          houses[h.index].lit.style.opacity = "1"; 
+      } else {
+          houses[h.index].lit.style.opacity = "0"; 
+      }
+    });
+  }
+
+  function animate(t) {
+    if (isPaused) {
+        lastT = t;
+        requestAnimationFrame(animate);
+        return;
+    }
+
+    const dt = Math.min(0.05, (t - lastT) / 1000);
+    lastT = t;
+
+    if (isEnding) {
+        const targetScale = 0.9;
+        
+        const vw = vp.clientWidth;
+        const vh = vp.clientHeight;
+        const targetX = (vw - vw * targetScale) / 2;
+        const targetY = (vh - vh * targetScale) / 2;
+
+        scale += (targetScale - scale) * 0.02; 
+        x += (targetX - x) * 0.02;
+        y += (targetY - y) * 0.02;
+
+    } else {
+    
+        const wpt = screenToWorld(cursorX, cursorY);
+        const targetS = closestSOnPath(wpt.x, wpt.y);
+        const delta = clamp(targetS + 50, 0, totalLen) - travel;
+        
+        let targetSpeed = 0;
+        if (Math.abs(delta) > STOP_RADIUS) {
+          targetSpeed = MAX_SPEED * clamp((Math.abs(delta) - STOP_RADIUS) / 200, 0, 1) * Math.sign(delta);
+        }
+        
+        vel += clamp(targetSpeed - vel, -ACC * dt, ACC * dt);
+        travel = clamp(travel + vel * dt, 0, totalLen);
+        
+        const p = posOnPath(travel);
+        let normAng = p.ang;
+        while (normAng <= -180) normAng += 360;
+        while (normAng > 180) normAng -= 360;
+
+        if (Math.abs(normAng) > 90) {
+            mole.__dir = -1; 
+        } else {
+            mole.__dir = 1;  
+        }
+
+        mole.style.left = (p.x - 45) + "px";
+        mole.style.top = (p.y - 60) + "px";
+        mole.style.transform = `scaleX(${mole.__dir})`;
+
+        let camTargetX = p.x;
+        let camTargetY = p.y;
+        
+        let lightX = p.x;
+        let lightY = p.y;
+        let lightR = 150; 
+
+        renderLight(lightX, lightY, lightR);
+        checkHouseProximity(p.x, p.y);
+        
+        const b = bounds();
+        const desiredX = b.vw * 0.5 - camTargetX * scale;
+        const desiredY = b.vh * 0.5 - camTargetY * scale;
+        const clampedX = clamp(desiredX, b.minX, b.maxX);
+        const clampedY = clamp(desiredY, b.minY, b.maxY);
+        
+        camX += (clampedX - camX) * 0.08;
+        camY += (clampedY - camY) * 0.08;
+        x = camX;
+        y = camY;
+    }
+    
+    applyTransform();
+    requestAnimationFrame(animate);
+  }
+
+  function resize() {
+    const dpr = Math.max(1, window.devicePixelRatio || 1);
+    tunnel.width = darknessCanvas.width = Math.floor(vp.clientWidth * dpr);
+    tunnel.height = darknessCanvas.height = Math.floor(vp.clientHeight * dpr);
+    tunnel.style.width = darknessCanvas.style.width = vp.clientWidth + "px";
+    tunnel.style.height = darknessCanvas.style.height = vp.clientHeight + "px";
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    darkCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    generateMapData();
+    renderTunnel();
+    buildPhysicsPath();
+    const b = bounds();
+    x = clamp(x, b.minX, b.maxX); y = clamp(y, b.minY, b.maxY);
+    camX = x; camY = y;
+    applyTransform();
+  }
+
+  window.addEventListener("resize", resize);
+  resize();
+  requestAnimationFrame(animate);
+  </script>
+</body>
+</html>

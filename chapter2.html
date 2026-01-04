@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Dig Your Thoughts</title>
+  <link rel="icon" type="image/png" href="./images/favicon.png">
+  <link rel="stylesheet" href="./css/chapter2.css" />
+</head>
+<body>
+  <main class="c2-stage">
+ 
+    <aside class="hud" aria-label="Tools & Color">
+      <div class="hud-title">DRAW</div>
+
+      <div class="hud-row">
+        <div class="hud-label">Selected</div>
+        <div id="pickedInfo" class="picked-info">-</div>
+      </div>
+
+      <div class="hud-row">
+        <div class="hud-label">Color</div>
+        <div class="picked-color">
+          <span id="colorDot" class="color-dot" aria-hidden="true"></span>
+          <span id="colorName" class="color-name">-</span>
+        </div>
+      </div>
+
+      <div class="hud-divider"></div>
+
+      <div class="hud-label">Tool</div>
+      <div class="toolbox">
+        <button id="drawToolBtn" class="toolbtn is-active" type="button">
+          <img id="drawToolImg" class="toolbtn-img" alt="">
+          <span class="toolbtn-tag">Draw</span>
+        </button>
+
+        <button id="eraseToolBtn" class="toolbtn" type="button">
+          <img class="toolbtn-img" src="./images/chapter1/erase.png" alt="">
+          <span class="toolbtn-tag">Erase</span>
+        </button>
+      </div>
+
+      <div class="hud-divider"></div>
+
+      <div class="hud-row">
+        <div class="hud-label">Stroke Size</div>
+        <div class="picked-info"><span id="sizeVal">10</span>px</div>
+      </div>
+      <input type="range" id="sizeSlider" min="1" max="50" value="10">
+
+      <div class="hud-divider"></div>
+
+      <div class="hud-help">
+        원 3개를 선으로 연결하면 확인이 활성화됩니다.<br/>
+        (한 번에 쭉 이어서 그리면 가장 확실해요)
+      </div>
+
+      <button id="confirmBtn" class="confirm" disabled>확인</button>
+      <button id="resetBtn" class="reset">원 다시 배치</button>
+    </aside>
+
+
+    <section class="canvas-wrap">
+      <canvas id="canvas" class="canvas"></canvas>
+
+      <div id="canvasHint" class="canvas-hint">
+        포인트를 연결하여 그림을 완성하세요
+      </div>
+
+     
+      <div id="mole" class="mole is-static" aria-hidden="true">
+        <img id="moleGif" class="mole-img mole-gif" alt="">
+        <img id="moleStatic" class="mole-img mole-static" alt="">
+
+        <div id="moleBubble" class="mole-speech">
+  <div id="moleText" class="mole-speech-text"></div>
+</div>
+
+      </div>
+
+  
+      <div id="c2Transition" class="c2-transition" aria-hidden="true">
+        <img id="c2TransGif" class="c2-trans-gif" alt="">
+        <img id="c2TransFreeze" class="c2-trans-freeze" alt="">
+        <button id="confirmAfterBtn" class="confirm-after" type="button">확인</button>
+      </div>
+    </section>
+  </main>
+
+  <script src="./js/chapter2.js"></script>
+</body>
+</html>

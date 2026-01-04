@@ -1,0 +1,115 @@
+
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Dig Your Thoughts</title>
+  <link rel="icon" type="image/png" href="./images/favicon.png">
+  <link rel="stylesheet" href="./css/chapter1.css" />
+</head>
+<body>
+  <main class="c1-stage">
+
+
+    <header class="palette-bar" aria-label="Color palette">
+      <div class="palette-title">COLOR</div>
+      <div class="palette" role="radiogroup" aria-label="색상 선택">
+        <button class="swatch is-active" type="button" data-color="red"></button>
+        <button class="swatch" type="button" data-color="orange"></button>
+        <button class="swatch" type="button" data-color="yellow"></button>
+        <button class="swatch" type="button" data-color="green"></button>
+        <button class="swatch" type="button" data-color="blue"></button>
+        <button class="swatch" type="button" data-color="navy"></button>
+        <button class="swatch" type="button" data-color="purple"></button>
+        <button class="swatch" type="button" data-color="black"></button>
+        <button class="swatch" type="button" data-color="white"></button>
+      </div>
+    </header>
+
+
+    <section class="tools-stage" aria-label="Tools">
+
+
+      <div id="setA" class="toolset is-active" data-set="A">
+        <button class="tool is-active" type="button" data-tool="pencil">
+          <img id="A_pencil" class="tool-img" src="./images/chapter1/pencil.png" alt="">
+          <span class="tool-tag">Pencil</span>
+        </button>
+        <button class="tool" type="button" data-tool="marker">
+          <img id="A_marker" class="tool-img" src="./images/chapter1/marker.png" alt="">
+          <span class="tool-tag">Marker</span>
+        </button>
+        <button class="tool" type="button" data-tool="fountain_pen">
+          <img id="A_fountain_pen" class="tool-img" src="./images/chapter1/fountain_pen.png" alt="">
+          <span class="tool-tag">Fountain</span>
+        </button>
+      </div>
+
+
+      <div id="setB" class="toolset is-standby" data-set="B">
+        <button class="tool is-active" type="button" data-tool="pencil">
+          <img id="B_pencil" class="tool-img" src="./images/chapter1/pencil.png" alt="">
+          <span class="tool-tag">Pencil</span>
+        </button>
+        <button class="tool" type="button" data-tool="marker">
+          <img id="B_marker" class="tool-img" src="./images/chapter1/marker.png" alt="">
+          <span class="tool-tag">Marker</span>
+        </button>
+        <button class="tool" type="button" data-tool="fountain_pen">
+          <img id="B_fountain_pen" class="tool-img" src="./images/chapter1/fountain_pen.png" alt="">
+          <span class="tool-tag">Fountain</span>
+        </button>
+      </div>
+
+
+      <button id="confirmBtn" class="confirm" type="button">
+        확인
+      </button>
+
+      <div class="hint">도구를 선택한 뒤 확인을 눌러주세요</div>
+
+
+<aside id="mole" class="mole" aria-label="Mole character">
+  <div id="moleSpeech" class="mole-speech" aria-live="polite" aria-atomic="true">
+    <div id="moleSpeechText" class="mole-speech-text"></div>
+  </div>
+
+
+  <img id="moleIntroGif" class="mole-img mole-gif mole-intro" src="./images/mole/mole1.gif" alt="mole intro gif">
+
+
+  <img id="moleRGif1" class="mole-img mole-gif mole-random" src="./images/mole/mole2.gif" alt="mole random gif 1">
+  <img id="moleRGif2" class="mole-img mole-gif mole-random" src="./images/mole/mole3.gif" alt="mole random gif 2">
+  <img id="moleRGif3" class="mole-img mole-gif mole-random" src="./images/mole/mole4.gif" alt="mole random gif 3">
+
+
+  <img id="moleStatic" class="mole-img mole-static" src="./images/mole/mole.png" alt="mole">
+</aside>
+
+    </section>
+
+
+    <div id="c1Transition" class="c1-transition" aria-hidden="true">
+      <img id="c1TransGif" class="c1-trans-gif" alt="">
+      <img id="c1TransFreeze" class="c1-trans-freeze" alt="">
+
+  
+      <button id="confirmAfterBtn" class="confirm confirm-after" type="button">
+        확인
+      </button>
+    </div>
+
+    <audio id="sfxColor" preload="auto">
+      <source src="./audio/color.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="sfxPick" preload="auto">
+      <source src="./audio/pick.mp3" type="audio/mpeg">
+    </audio>
+
+  </main>
+
+  <script src="./js/chapter1.js"></script>
+</body>
+</html>

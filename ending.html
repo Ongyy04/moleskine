@@ -1,0 +1,413 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Dig Your Thoughts</title>
+  <link rel="icon" type="image/png" href="./images/favicon.png">
+  <style>
+    @font-face {
+      font-family: 'Shinb7';
+      src: url('./SSShinb7Regular.ttf') format('truetype');
+    }
+
+    html, body {
+      margin: 0; padding: 0;
+      width: 100%; height: 100%;
+      overflow: hidden;
+      background: #000;
+      font-family: 'Shinb7', sans-serif;
+    }
+
+    #viewport {
+      position: relative;
+      width: 100vw; height: 100vh;
+      overflow: hidden;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    #scale-container {
+      position: relative;
+      width: 1920px;
+      height: 951px;
+      background: transparent;
+      transform-origin: center center;
+      flex-shrink: 0;
+    }
+
+    .bg {
+      position: absolute;
+      inset: 0;
+      z-index: 0;
+      background:
+        radial-gradient(circle at 50% 45%,
+          rgba(255, 250, 235, 0.98) 0%,
+          rgba(255, 243, 225, 0.96) 32%,
+          rgba(250, 227, 206, 0.95) 62%,
+          rgba(240, 205, 185, 0.96) 100%),
+        radial-gradient(circle at 50% 50%,
+          rgba(255,255,255,0.55) 0%,
+          rgba(255,255,255,0) 55%),
+        radial-gradient(circle at 50% 50%,
+          rgba(0,0,0,0.10) 0%,
+          rgba(0,0,0,0.28) 75%,
+          rgba(0,0,0,0.40) 100%);
+    }
+
+    #notebook-preview {
+      position: absolute;
+      left: -105.87px;
+      top: -162.91px;
+      width: 1276.81px;
+      height: 1276.81px;
+      z-index: 10;
+      object-fit: contain;
+      transition: opacity 0.3s ease; 
+    }
+
+    #drawing-layer {
+        position: absolute;
+        left: 0; top: 0;
+        width: 1920px; 
+        height: 951px;
+        z-index: 15; 
+        pointer-events: none; 
+    }
+
+  
+    #ui-container {
+      position: absolute;
+      left: 1000px; 
+      top: 50%;
+      transform: translateY(-50%);
+      width: 650px; 
+      z-index: 20;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      gap: 25px; 
+    }
+
+    .title-area h1 {
+      color: #3e2723; 
+      font-size: 3.5rem; 
+      margin: 0 0 5px 0;
+      text-shadow: 0 0 20px rgba(255, 255, 255, 0.8);
+      line-height: 1.1;
+      white-space: nowrap; 
+    }
+    .title-area p {
+      color: #5d4037;
+      font-size: 1.3rem; 
+      margin: 0;
+      font-weight: bold;
+      opacity: 0.9;
+    }
+
+    .palette-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr); 
+      gap: 20px;
+      width: auto;
+      margin-top: 10px;
+    }
+
+   
+    .color-btn {
+      width: 65px; 
+      height: 65px;
+      border-radius: 50%;
+      border: 2px solid rgba(62, 39, 35, 0.1);
+      cursor: pointer;
+      position: relative;
+      transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+    }
+    .color-btn:hover {
+      transform: scale(1.1);
+      border-color: #3e2723;
+    }
+    .color-btn.active {
+      transform: scale(1.15);
+      border-color: #3e2723;
+      box-shadow: 0 0 15px rgba(62, 39, 35, 0.2);
+    }
+
+
+    .custom-controls {
+      display: flex;
+      gap: 30px;
+      padding: 15px 30px;
+      background: rgba(255, 255, 255, 0.5);
+      border-radius: 20px;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid rgba(255,255,255,0.8);
+      box-shadow: 0 5px 15px rgba(62, 39, 35, 0.05);
+    }
+    
+    .control-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      color: #3e2723;
+      font-size: 1.1rem; 
+      font-weight: bold;
+    }
+
+
+    input[type="color"] {
+      -webkit-appearance: none;
+      border: none;
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      cursor: pointer;
+      background: none;
+      padding: 0;
+      overflow: hidden;
+      box-shadow: 0 3px 8px rgba(0,0,0,0.1);
+      transition: transform 0.2s;
+    }
+    input[type="color"]:hover {
+      transform: scale(1.1);
+    }
+    input[type="color"]::-webkit-color-swatch-wrapper {
+      padding: 0;
+    }
+    input[type="color"]::-webkit-color-swatch {
+      border: 2px solid #fff;
+      border-radius: 50%;
+    }
+
+
+    .finish-btn {
+      width: 250px;
+      padding: 15px 0;
+      background: #3e2723;
+      border: none;
+      border-radius: 40px;
+      font-family: 'Shinb7', sans-serif;
+      font-size: 1.6rem;
+      color: #fff;
+      cursor: pointer;
+      transition: all 0.3s;
+      box-shadow: 0 5px 10px rgba(62, 39, 35, 0.2);
+      margin-top: 10px;
+    }
+    .finish-btn:hover {
+      background: #5d4037;
+      transform: scale(1.05);
+    }
+
+  </style>
+</head>
+<body>
+
+  <div id="viewport">
+    <div id="scale-container">
+      
+      <div class="bg"></div>
+
+      <img id="notebook-preview" src="./images/notebook/1.png" alt="Notebook Preview">
+      <canvas id="drawing-layer"></canvas>
+
+      <div id="ui-container">
+        
+        <div class="title-area">
+          <h1>Make Your Own Moleskine</h1>
+          <p>노트 색상을 고르고, 그림 색도 직접 꾸며보세요!</p>
+        </div>
+
+        <div class="palette-grid" id="palette"></div>
+
+        <div class="custom-controls">
+            <div class="control-item">
+                <span>Line</span>
+                <input type="color" id="outerColorPicker" value="#FFD8B3">
+            </div>
+            <div class="control-item">
+                <span>Stitch</span>
+                <input type="color" id="innerColorPicker" value="#FFAB76">
+            </div>
+        </div>
+
+        <div style="font-size: 1rem; color:#8d6e63; margin-top: -10px;">
+           * 원을 클릭하여 그림 색을 변경하세요.
+        </div>
+
+        <button class="finish-btn" onclick="finishCustom()">제작 완료</button>
+
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+
+    const IMG_PATH = "./images/notebook/"; 
+    
+    // [유지] 이전에 설정한 Hex 코드
+    const colors = [
+      { name: 'PalePink', code: '#f8e8ea', file: '1.png', outer: '#dcaab1', inner: '#ffffff' },
+      { name: 'Brown',    code: '#5b3f32', file: '2.png', outer: '#2a1d17', inner: '#a1887f' },
+      { name: 'SkyBlue',  code: '#e1eef6', file: '3.png', outer: '#a8c2cf', inner: '#ffffff' },
+      { name: 'DarkChoco',code: '#382f28', file: '4.png', outer: '#120f0c', inner: '#6d5d54' },
+      { name: 'Mustard',  code: '#dbbb7e', file: '5.png', outer: '#8f774a', inner: '#fff8e1' },
+      { name: 'LightGrey',code: '#e3e5e2', file: '6.png', outer: '#9e9e9e', inner: '#ffffff' },
+      { name: 'Beige',    code: '#d5b990', file: '7.png', outer: '#8d6e63', inner: '#f5f5f5' }
+    ];
+
+    /* ----------------------------------------------------------------
+       2. UI 렌더링 & 이벤트
+       ---------------------------------------------------------------- */
+    const paletteEl = document.getElementById('palette');
+    const notebookImg = document.getElementById('notebook-preview');
+    const outerPicker = document.getElementById('outerColorPicker');
+    const innerPicker = document.getElementById('innerColorPicker');
+
+    let currentSelection = 'PalePink';
+
+    function initPalette() {
+      paletteEl.innerHTML = '';
+      colors.forEach(c => {
+        const btn = document.createElement('div');
+        btn.className = 'color-btn';
+        btn.style.backgroundColor = c.code;
+        btn.dataset.name = c.name;
+        btn.dataset.file = c.file;
+
+        if (c.name === currentSelection) {
+          btn.classList.add('active');
+        }
+
+        btn.addEventListener('click', () => {
+          changeColor(c, btn);
+        });
+        paletteEl.appendChild(btn);
+      });
+      
+      const firstColor = colors[0];
+      if(firstColor) {
+          currentSelection = firstColor.name;
+          notebookImg.src = IMG_PATH + firstColor.file;
+          outerPicker.value = firstColor.outer;
+          innerPicker.value = firstColor.inner;
+          const firstBtn = paletteEl.querySelector('.color-btn');
+          if(firstBtn) firstBtn.classList.add('active');
+      }
+    }
+
+    function changeColor(colorData, btnElement) {
+      notebookImg.src = IMG_PATH + colorData.file;
+      currentSelection = colorData.name;
+      
+      document.querySelectorAll('.color-btn').forEach(b => b.classList.remove('active'));
+      if(btnElement) btnElement.classList.add('active');
+
+      outerPicker.value = colorData.outer;
+      innerPicker.value = colorData.inner;
+
+      loadAndDrawPath();
+    }
+
+    outerPicker.addEventListener('input', () => {
+        loadAndDrawPath();
+    });
+    innerPicker.addEventListener('input', () => {
+        loadAndDrawPath();
+    });
+
+    function finishCustom() {
+      localStorage.setItem('selectedColor', currentSelection);
+      localStorage.setItem('customOuterColor', outerPicker.value);
+      localStorage.setItem('customInnerColor', innerPicker.value);
+      
+      
+      
+  
+      location.href = "https://www.moleskine.co.kr/"; 
+    }
+
+
+    function resize() {
+      const container = document.getElementById('scale-container');
+      const w = window.innerWidth;
+      const h = window.innerHeight;
+      const baseW = 1920;
+      const baseH = 951;
+      const scale = Math.min(w / baseW, h / baseH);
+      container.style.transform = `scale(${scale})`;
+    }
+    window.addEventListener('resize', resize);
+
+
+    const TARGET_AREA = {
+      x: 310.17,
+      y: 125.49,
+      w: 430.08,
+      h: 700.66
+    };
+
+    function drawPathPoints(ctx, pathPoints) {
+      ctx.beginPath();
+      const firstP = pathPoints[0];
+      const startX = TARGET_AREA.x + (firstP.x * TARGET_AREA.w);
+      const startY = TARGET_AREA.y + (firstP.y * TARGET_AREA.h);
+      ctx.moveTo(startX, startY);
+
+      for (let i = 1; i < pathPoints.length; i++) {
+        const p = pathPoints[i];
+        const targetX = TARGET_AREA.x + (p.x * TARGET_AREA.w);
+        const targetY = TARGET_AREA.y + (p.y * TARGET_AREA.h);
+        ctx.lineTo(targetX, targetY);
+      }
+      ctx.stroke();
+    }
+
+    function loadAndDrawPath() {
+      const canvas = document.getElementById('drawing-layer');
+      const ctx = canvas.getContext('2d');
+
+      canvas.width = 1920;
+      canvas.height = 951;
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      const rawData = localStorage.getItem("drawnPath");
+      if (!rawData) return;
+
+      let pathPoints = [];
+      try {
+        pathPoints = JSON.parse(rawData);
+      } catch (e) { console.error(e); return; }
+      if (!Array.isArray(pathPoints) || pathPoints.length < 2) return;
+
+      const outerColor = outerPicker.value;
+      const innerColor = innerPicker.value;
+
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+
+   
+      ctx.setLineDash([]); 
+      ctx.strokeStyle = outerColor; 
+      ctx.lineWidth = 24;           
+      drawPathPoints(ctx, pathPoints);
+
+    
+      ctx.setLineDash([12, 16]); 
+      ctx.strokeStyle = innerColor; 
+      ctx.lineWidth = 5;            
+      drawPathPoints(ctx, pathPoints);
+    }
+    
+    initPalette();
+    resize();
+    setTimeout(loadAndDrawPath, 100);
+
+  </script>
+</body>
+</html>
